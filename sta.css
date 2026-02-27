@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enhanced Skill-Based Internship & Project Matching</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: url('https://images.unsplash.com/photo-1531497865144-0460d4f3a41a?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+}
+h1, h2 { text-align: center; color: #333; }
+.container {
+    max-width: 950px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+label { display: block; margin-top: 10px; font-weight: bold; }
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ff66b3;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+}
+button:hover { background-color: #ff3385; }
+.results { margin-top: 25px; }
+.candidate {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #fff0f6;
+}
+.reasoning { font-size: 0.9em; color: #555; margin-top: 6px; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Enhanced Skill-Based Internship & Project Matching</h1>
+
+<h2>Add Candidate</h2>
+<label>Candidate Name</label>
+<input id="candidateName">
+
+<label>Skills (Python:4, SQL:3)</label>
+<input id="skills">
+
+<label>Experience (years)</label>
+<input type="number" id="experience">
+
+<label>Certifications</label>
+<input id="certifications">
+
+<label>Preferred Domain</label>
+<input id="domain">
+
+<button onclick="addCandidate()">Add Candidate</button>
+
+<h2>Define Project Requirements</h2>
+<label>Project Name</label>
+<input id="projectName">
+
+<label>Required Skills (Python:5, SQL:4)</label>
+<input id="projectSkills">
+
+<label>Required Experience</label>
+<input type="number" id="projectExperience">
+
+<label>Preferred Certifications</label>
+<input id="projectCertifications">
+
+<button onclick="matchCandidates()">Match Candidates</button>
+
+<div id="results" class="results"></div>
+</div>
+
+<script>
+let candidates = JSON.parse(localStorage.getItem("candidates") || "[]");
+
+function saveCandidates() {
+    localStorage.setItem("candidates", JSON.stringify(candidates));
+}
+
+function parseSkills(text) {
+    const skills = {};
+    text.split(",").forEach(item => {
+        const [skill, value] = item.split(":").map(s => s.trim());
+        if (skill && value) skills[skill.toLowerCase()] = Number(value);
+    });
+    return skills;
+}
+
+function addCandidate() {
+    const name = candidateName.value.trim();
+    const skills = parseSkills(skillsInput = skills.value);
+    const experience = Number(experience.value) || 0;
+    const certifications = certifications.value.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+    const domain = domain.value.trim();
+
+    if (!name || Object.keys(skills).length === 0) {
+        alert("Enter name and skills");
+        return;
+    }
+
+    candidates.push({ name, skills, experience, certifications, domain });
+    saveCandidates();
+    alert("Candidate added!");
+}
+
+function matchCandidates() {
+    const projectName = projectName.value.trim();
+    const requiredSkills = parseSkills(projectSkills.value);
+    const requiredExperience = Number(projectExperience.value) || 0;
+    const preferredCerts = projectCertifications.value.split(",").map(s => s.trim().toLowerCase());
+
+    if (!projectName || Object.keys(requiredSkills).length === 0) {
+        alert("Enter project details");
+        return;
+    }
+
+    results.innerHTML = `<h2>Matching Results for ${projectName}</h2>`;
+
+    candidates.map(candidate => {
+        let score = 0;
+        let reasoning = [];
+
+        for (let skill in requiredSkills) {
+            const weight = requiredSkills[skill];
+            const level = candidate.skills[skill] || 0;
+            score += (level / 5) * weight * 20;
+            reasoning.push(`${skill}: level ${level}`);
+        }
+
+        if (requiredExperience > 0) {
+            const expBonus = Math.min(candidate.experience / requiredExperience, 1) * 10;
+            score += expBonus;
+            reasoning.push(`Experience bonus +${expBonus.toFixed(1)}`);
+        }
+
+        const certBonus = preferredCerts.filter(c => candidate.certifications.includes(c)).length * 5;
+        score += certBonus;
+
+        return {
+            name: candidate.name,
+            score: Math.min(score, 100).toFixed(2),
+            reasoning
+        };
+    }).sort((a, b) => b.score - a.score)
+      .forEach(m => {
+        results.innerHTML += `
+        <div class="candidate">
+            <strong>${m.name}</strong> – ${m.score}%
+            <div class="reasoning">${m.reasoning.join("<br>")}</div>
+        </div>`;
+    });
+}
+</script>
+
+</body>
+</html>
