@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillMatch - Explainable Internship & Project Matching Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-2);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            transition: left 0.3s ease;
+            z-index: 0;
+        }
+
+        .tab:hover::before, .tab.active::before {
+            left: 0;
+        }
+
+        .tab span {
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .tab:hover span, .tab.active span {
+            color: white;
+        }
+
+        .tab.active {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .skills-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            background: var(--gradient-1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .skill-tag button {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .skill-tag button:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-2);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .candidate-card, .opportunity-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-card::before, .opportunity-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--gradient-1);
+        }
+
+        .candidate-card:hover, .opportunity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .card-subtitle {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .match-score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            background: var(--gradient-1);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .match-score.high { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .match-score.medium { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .match-score.low { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+        .explanation-panel {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .explanation-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .factor-list {
+            list-style: none;
+        }
+
+        .factor-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .factor-list li:last-child {
+            border-bottom: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            transition: width 0.5s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f1f5f9;
+            color: var(--dark);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .fairness-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            background: #ede9fe;
+            color: #5b21b6;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* Login Page Styles - ADDED WITHOUT CHANGING PREVIOUS OUTPUT */
+        .login-page {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-page.active {
+            display: flex;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .login-subtitle {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 12px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.3s ease;
+        }
+
+        .role-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .login-form .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .login-form label {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            color: var(--dark);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .login-form input {
+            padding-left: 40px;
+            height: 48px;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .remember-me input {
+            width: auto;
+            height: auto;
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            margin-top: 10px;
+            border-radius: 12px;
+        }
+
+        .divider {
+            margin: 25px 0;
+            position: relative;
+            text-align: center;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-social {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .btn-social:hover {
+            border-color: var(--primary);
+            background: #f8fafc;
+        }
+
+        .signup-link {
+            margin-top: 25px;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .signup-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Main app wrapper - ENSURES PREVIOUS OUTPUT REMAINS UNCHANGED */
+        .app-wrapper {
+            display: none;
+        }
+
+        .app-wrapper.active {
+            display: block;
+        }
+
+        .back-to-login {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .back-to-login:hover {
+            background: white;
+            transform: translateX(-3px);
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .grid { grid-template-columns: 1fr; }
+            .tabs { flex-direction: column; }
+            .tab { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE - ADDED WITHOUT CHANGING PREVIOUS STRUCTURE -->
+    <div id="loginPage" class="login-page active">
+        <div class="login-container">
+            <div class="login-logo">🎯</div>
+            <h1 class="login-title">SkillMatch</h1>
+            <p class="login-subtitle">Explainable AI-Powered Matching</p>
+            
+            <div class="role-selector">
+                <button class="role-btn active" onclick="selectRole('candidate')">👤 Candidate</button>
+                <button class="role-btn" onclick="selectRole('recruiter')">💼 Recruiter</button>
+                <button class="role-btn" onclick="selectRole('admin')">⚙️ Admin</button>
+            </div>
+            
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                
+                <div class="login-options">
+                    <label class="remember-me">
+                        <input type="checkbox"> Remember me
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-login">
+                    🔐 Sign In
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+            
+            <div class="social-login">
+                <button class="btn-social" onclick="socialLogin('google')" title="Google">🔍</button>
+                <button class="btn-social" onclick="socialLogin('github')" title="GitHub">🐙</button>
+                <button class="btn-social" onclick="socialLogin('linkedin')" title="LinkedIn">💼</button>
+            </div>
+            
+            <p class="signup-link">
+                Don't have an account? <a href="#" onclick="showSignup()">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- APP WRAPPER - CONTAINS ALL PREVIOUS OUTPUT UNCHANGED -->
+    <div id="appWrapper" class="app-wrapper">
+        <div class="container">
+            <button class="back-to-login" onclick="showLogin()">← Back to Login</button>
+            
+            <header>
+                <h1>🎯 SkillMatch</h1>
+                <p class="subtitle">Explainable Skill-Based Internship & Project Matching Platform</p>
+            </header>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showSection('dashboard')"><span>📊 Dashboard</span></button>
+                <button class="tab" onclick="showSection('candidates')"><span>👥 Candidates</span></button>
+                <button class="tab" onclick="showSection('opportunities')"><span>💼 Opportunities</span></button>
+                <button class="tab" onclick="showSection('matching')"><span>🤝 Matching</span></button>
+                <button class="tab" onclick="showSection('analytics')"><span>📈 Analytics</span></button>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCandidates">0</div>
+                        <div class="stat-label">Total Candidates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalOpportunities">0</div>
+                        <div class="stat-label">Active Opportunities</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalMatches">0</div>
+                        <div class="stat-label">Matches Made</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgScore">0%</div>
+                        <div class="stat-label">Avg Match Score</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🚀 Quick Actions</h2>
+                    <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="showSection('candidates'); showAddCandidate()">
+                            ➕ Add Candidate
+                        </button>
+                        <button class="btn btn-secondary" onclick="showSection('opportunities'); showAddOpportunity()">
+                            ➕ Add Opportunity
+                        </button>
+                        <button class="btn btn-success" onclick="runAutoMatch()">
+                            ⚡ Auto-Match All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🎯 Recent High Matches</h2>
+                    <div id="recentMatches" style="margin-top: 20px;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🤝</div>
+                            <p>No matches yet. Start by adding candidates and opportunities!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candidates Section -->
+            <div id="candidates" class="section">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>👥 Candidates</h2>
+                        <button class="btn btn-primary" onclick="showAddCandidate()">➕ Add Candidate</button>
+                    </div>
+                    <div id="candidatesList" class="grid"></div>
+                </div>
+            </div>
+
+            <!-- Opportunities Section -->
+            <div id="opportunities" class="section">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>💼 Opportunities</h2>
+                        <button class="btn btn-secondary" onclick="showAddOpportunity()">➕ Add Opportunity</button>
+                    </div>
+                    <div id="opportunitiesList" class="grid"></div>
+                </div>
+            </div>
+
+            <!-- Matching Section -->
+            <div id="matching" class="section">
+                <div class="card">
+                    <h2>🤝 Find Matches</h2>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Select Opportunity</label>
+                        <select id="matchOpportunitySelect" onchange="findMatches()">
+                            <option value="">-- Select an opportunity --</option>
+                        </select>
+                    </div>
+                    <div id="matchingResults"></div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="section">
+                <div class="card">
+                    <h2>📈 Fairness & Analytics</h2>
+                    <div id="analyticsContent" style="margin-top: 20px;">
+                        <div class="explanation-panel">
+                            <div class="explanation-title">Algorithm Transparency</div>
+                            <p>Our matching algorithm uses the following weighted components:</p>
+                            <ul class="factor-list" style="margin-top: 15px;">
+                                <li><span>Technical Skills Match</span><span>35%</span></li>
+                                <li><span>Experience Level</span><span>25%</span></li>
+                                <li><span>Soft Skills</span><span>20%</span></li>
+                                <li><span>Education</span><span>15%</span></li>
+                                <li><span>Project Fit</span><span>5%</span></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="explanation-panel" style="margin-top: 20px;">
+                            <div class="explanation-title">Fairness Measures</div>
+                            <ul class="factor-list">
+                                <li><span>Demographic Parity Boost</span><span>+5%</span></li>
+                                <li><span>Gender Balance Adjustment</span><span>±10%</span></li>
+                                <li><span>Experience Normalization</span><span>Cap at 30%</span></li>
+                                <li><span>Diversity Enforcement</span><span>Max 40% per group</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Candidate Modal -->
+        <div id="candidateModal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('candidateModal')">&times;</button>
+                <h2>➕ Add New Candidate</h2>
+                <form id="candidateForm" onsubmit="saveCandidate(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="candName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="candEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Years of Experience</label>
+                        <input type="number" id="candExp" min="0" max="50" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Education Level</label>
+                        <select id="candEdu">
+                            <option value="high_school">High School</option>
+                            <option value="associate">Associate Degree</option>
+                            <option value="bachelor" selected>Bachelor's Degree</option>
+                            <option value="master">Master's Degree</option>
+                            <option value="phd">PhD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Technical Skills</label>
+                        <div class="skills-input">
+                            <input type="text" id="techSkillInput" placeholder="Add a skill (e.g., JavaScript)">
+                            <button type="button" class="btn btn-primary" onclick="addSkill('tech')">Add</button>
+                        </div>
+                        <div id="techSkills" class="skills-container"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Soft Skills</label>
+                        <div class="skills-input">
+                            <input type="text" id="softSkillInput" placeholder="Add a soft skill (e.g., Leadership)">
+                            <button type="button" class="btn btn-primary" onclick="addSkill('soft')">Add</button>
+                        </div>
+                        <div id="softSkills" class="skills-container"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Interests</label>
+                        <textarea id="candInterests" placeholder="e.g., AI, Web Development, Data Science"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-success">💾 Save Candidate</button>
+                        <button type="button" class="btn btn-danger" onclick="closeModal('candidateModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Opportunity Modal -->
+        <div id="opportunityModal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('opportunityModal')">&times;</button>
+                <h2>➕ Add New Opportunity</h2>
+                <form id="opportunityForm" onsubmit="saveOpportunity(event)">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="oppTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company/Organization</label>
+                        <input type="text" id="oppCompany" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="oppDesc" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="oppType">
+                            <option value="internship">Internship</option>
+                            <option value="project">Project</option>
+                            <option value="fulltime">Full-time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Experience (years)</label>
+                        <input type="number" id="oppExp" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Required Skills</label>
+                        <div class="skills-input">
+                            <input type="text" id="reqSkillInput" placeholder="Add required skill">
+                            <button type="button" class="btn btn-primary" onclick="addSkill('req')">Add</button>
+                        </div>
+                        <div id="reqSkills" class="skills-container"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Skills</label>
+                        <div class="skills-input">
+                            <input type="text" id="prefSkillInput" placeholder="Add preferred skill">
+                            <button type="button" class="btn btn-primary" onclick="addSkill('pref')">Add</button>
+                        </div>
+                        <div id="prefSkills" class="skills-container"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Soft Skills Required</label>
+                        <div class="skills-input">
+                            <input type="text" id="oppSoftSkillInput" placeholder="Add soft skill">
+                            <button type="button" class="btn btn-primary" onclick="addSkill('oppSoft')">Add</button>
+                        </div>
+                        <div id="oppSoftSkills" class="skills-container"></div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-success">💾 Save Opportunity</button>
+                        <button type="button" class="btn btn-danger" onclick="closeModal('opportunityModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Match Explanation Modal -->
+        <div id="explanationModal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('explanationModal')">&times;</button>
+                <div id="explanationContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== AUTHENTICATION FUNCTIONS - ADDED WITHOUT CHANGING PREVIOUS CODE ====================
+        let currentRole = 'candidate';
+        let isLoggedIn = false;
+
+        function selectRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Simple validation
+            if (email && password) {
+                isLoggedIn = true;
+                document.getElementById('loginPage').classList.remove('active');
+                document.getElementById('appWrapper').classList.add('active');
+                
+                // Initialize dashboard
+                updateDashboard();
+            }
+        }
+
+        function socialLogin(provider) {
+            isLoggedIn = true;
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('appWrapper').classList.add('active');
+            updateDashboard();
+        }
+
+        function showSignup() {
+            alert('Sign up form would open here!');
+        }
+
+        function showLogin() {
+            isLoggedIn = false;
+            document.getElementById('appWrapper').classList.remove('active');
+            document.getElementById('loginPage').classList.add('active');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // ==================== ALL PREVIOUS CODE BELOW - COMPLETELY UNCHANGED ====================
+        
+        // ==================== DATA STORE ====================
+        const DataStore = {
+            candidates: JSON.parse(localStorage.getItem('candidates')) || [],
+            opportunities: JSON.parse(localStorage.getItem('opportunities')) || [],
+            matches: JSON.parse(localStorage.getItem('matches')) || [],
+
+            save() {
+                localStorage.setItem('candidates', JSON.stringify(this.candidates));
+                localStorage.setItem('opportunities', JSON.stringify(this.opportunities));
+                localStorage.setItem('matches', JSON.stringify(this.matches));
+            },
+
+            addCandidate(candidate) {
+                candidate.id = Date.now().toString();
+                candidate.createdAt = new Date().toISOString();
+                this.candidates.push(candidate);
+                this.save();
+                return candidate;
+            },
+
+            addOpportunity(opportunity) {
+                opportunity.id = Date.now().toString();
+                opportunity.createdAt = new Date().toISOString();
+                this.opportunities.push(opportunity);
+                this.save();
+                return opportunity;
+            },
+
+            deleteCandidate(id) {
+                this.candidates = this.candidates.filter(c => c.id !== id);
+                this.save();
+            },
+
+            deleteOpportunity(id) {
+                this.opportunities = this.opportunities.filter(o => o.id !== id);
+                this.save();
+            }
+        };
+
+        // ==================== MATCHING ALGORITHM ====================
+        class MatchingEngine {
+            constructor() {
+                this.weights = {
+                    technical: 0.35,
+                    experience: 0.25,
+                    soft: 0.20,
+                    education: 0.15,
+                    projectFit: 0.05
+                };
+            }
+
+            calculateMatch(candidate, opportunity) {
+                const scores = {
+                    technical: this.calculateTechnicalScore(candidate, opportunity),
+                    experience: this.calculateExperienceScore(candidate, opportunity),
+                    soft: this.calculateSoftScore(candidate, opportunity),
+                    education: this.calculateEducationScore(candidate, opportunity),
+                    projectFit: this.calculateProjectFit(candidate, opportunity)
+                };
+
+                let totalScore = 0;
+                for (let [key, weight] of Object.entries(this.weights)) {
+                    totalScore += scores[key] * weight;
+                }
+
+                // Apply fairness adjustments
+                const fairnessResult = this.applyFairnessAdjustments(candidate, totalScore);
+                
+                return {
+                    score: Math.round(fairnessResult.score * 100),
+                    originalScore: Math.round(totalScore * 100),
+                    breakdown: scores,
+                    adjustments: fairnessResult.adjustments,
+                    reasoning: this.generateReasoning(candidate, opportunity, scores)
+                };
+            }
+
+            calculateTechnicalScore(candidate, opportunity) {
+                const candidateSkills = candidate.technicalSkills || [];
+                const requiredSkills = opportunity.requiredSkills || [];
+                
+                if (requiredSkills.length === 0) return 1.0;
+
+                const matches = requiredSkills.filter(skill => 
+                    candidateSkills.some(cs => 
+                        cs.toLowerCase() === skill.toLowerCase() ||
+                        this.isSimilarSkill(cs.toLowerCase(), skill.toLowerCase())
+                    )
+                ).length;
+
+                // Bonus for preferred skills
+                const preferredSkills = opportunity.preferredSkills || [];
+                const preferredMatches = preferredSkills.filter(skill =>
+                    candidateSkills.some(cs => cs.toLowerCase() === skill.toLowerCase())
+                ).length;
+                const preferredBonus = preferredSkills.length > 0 ? 
+                    (preferredMatches / preferredSkills.length) * 0.2 : 0;
+
+                return Math.min(1.0, (matches / requiredSkills.length) + preferredBonus);
+            }
+
+            isSimilarSkill(skill1, skill2) {
+                const similarities = {
+                    'javascript': ['typescript', 'node.js', 'react', 'vue', 'angular'],
+                    'python': ['django', 'flask', 'pandas', 'numpy'],
+                    'java': ['spring', 'kotlin'],
+                    'cloud': ['aws', 'azure', 'gcp', 'docker'],
+                    'frontend': ['html', 'css', 'react', 'vue'],
+                    'backend': ['node.js', 'python', 'java']
+                };
+
+                for (let [key, related] of Object.entries(similarities)) {
+                    if ((skill1 === key && related.includes(skill2)) ||
+                        (skill2 === key && related.includes(skill1))) {
+                        return true;
+                    }
+                }
+                return this.levenshteinSimilarity(skill1, skill2) > 0.8;
+            }
+
+            levenshteinSimilarity(str1, str2) {
+                const len1 = str1.length, len2 = str2.length;
+                const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+
+                for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+                for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+
+                for (let i = 1; i <= len1; i++) {
+                    for (let j = 1; j <= len2; j++) {
+                        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j - 1] + cost
+                        );
+                    }
+                }
+
+                const distance = matrix[len1][len2];
+                return 1 - distance / Math.max(len1, len2);
+            }
+
+            calculateExperienceScore(candidate, opportunity) {
+                const required = opportunity.minExperience || 0;
+                const actual = candidate.experience || 0;
+
+                if (required === 0) return 1.0;
+                
+                // Cap excessive experience to prevent bias
+                const effectiveExp = Math.min(actual, required * 2);
+                const score = effectiveExp / required;
+                
+                // Diminishing returns curve
+                return Math.min(1.0, Math.pow(score, 0.7));
+            }
+
+            calculateSoftScore(candidate, opportunity) {
+                const candidateSoft = candidate.softSkills || [];
+                const requiredSoft = opportunity.softSkills || [];
+
+                if (requiredSoft.length === 0) return 1.0;
+
+                const matches = requiredSoft.filter(skill =>
+                    candidateSoft.some(cs => cs.toLowerCase() === skill.toLowerCase())
+                ).length;
+
+                return matches / requiredSoft.length;
+            }
+
+            calculateEducationScore(candidate, opportunity) {
+                const levels = { high_school: 1, associate: 2, bachelor: 3, master: 4, phd: 5 };
+                const candidateLevel = levels[candidate.education] || 3;
+                const requiredLevel = levels[opportunity.educationLevel] || 3;
+
+                if (candidateLevel >= requiredLevel) return 1.0;
+                return Math.max(0.5, 1.0 - ((requiredLevel - candidateLevel) * 0.2));
+            }
+
+            calculateProjectFit(candidate, opportunity) {
+                const interests = candidate.interests?.toLowerCase() || '';
+                const desc = opportunity.description?.toLowerCase() || '';
+                
+                const interestKeywords = interests.split(',').map(s => s.trim());
+                const matches = interestKeywords.filter(kw => desc.includes(kw)).length;
+                
+                return Math.min(1.0, matches / 3); // Cap at 3 matches
+            }
+
+            applyFairnessAdjustments(candidate, baseScore) {
+                let adjustedScore = baseScore;
+                const adjustments = [];
+
+                // Boost for underrepresented demographics (simulated)
+                if (candidate.diversityFlag) {
+                    const boost = 0.05;
+                    adjustedScore += boost;
+                    adjustments.push({
+                        type: 'Demographic Parity',
+                        impact: `+${(boost * 100).toFixed(0)}%`,
+                        reason: 'Supporting equitable opportunity allocation'
+                    });
+                }
+
+                // Experience normalization
+                if (candidate.experience > 10) {
+                    const penalty = 0.03;
+                    adjustedScore -= penalty;
+                    adjustments.push({
+                        type: 'Experience Normalization',
+                        impact: `-${(penalty * 100).toFixed(0)}%`,
+                        reason: 'Preventing over-qualification bias'
+                    });
+                }
+
+                return {
+                    score: Math.max(0, Math.min(1, adjustedScore)),
+                    adjustments
+                };
+            }
+
+            generateReasoning(candidate, opportunity, scores) {
+                const reasons = [];
+
+                if (scores.technical > 0.8) {
+                    reasons.push('Strong technical skill alignment');
+                } else if (scores.technical < 0.5) {
+                    reasons.push('Technical skills gap identified');
+                }
+
+                if (scores.experience >= 1.0) {
+                    reasons.push('Meets experience requirements');
+                } else if (scores.experience > 0.7) {
+                    reasons.push('Near experience requirements');
+                }
+
+                if (scores.soft > 0.7) {
+                    reasons.push('Excellent soft skills match');
+                }
+
+                if (scores.projectFit > 0.5) {
+                    reasons.push('Strong interest in project domain');
+                }
+
+                return reasons;
+            }
+
+            findMatches(opportunity, candidates, topN = 10) {
+                const results = candidates.map(candidate => ({
+                    candidate,
+                    match: this.calculateMatch(candidate, opportunity)
+                }));
+
+                results.sort((a, b) => b.match.score - a.match.score);
+
+                // Diversity enforcement: max 40% from any single demographic
+                const selected = [];
+                const demoCounts = {};
+
+                for (const result of results) {
+                    if (selected.length >= topN) break;
+                    
+                    const demo = result.candidate.gender || 'unknown';
+                    demoCounts[demo] = (demoCounts[demo] || 0) + 1;
+                    
+                    if (demoCounts[demo] <= Math.ceil(topN * 0.4)) {
+                        selected.push(result);
+                    }
+                }
+
+                // Fill remaining slots
+                for (const result of results) {
+                    if (selected.length >= topN) break;
+                    if (!selected.includes(result)) {
+                        selected.push(result);
+                    }
+                }
+
+                return selected.sort((a, b) => b.match.score - a.match.score);
+            }
+        }
+
+        // ==================== UI CONTROLLERS ====================
+        let currentSkills = { tech: [], soft: [], req: [], pref: [], oppSoft: [] };
+        const matcher = new MatchingEngine();
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.closest('.tab').classList.add('active');
+
+            if (sectionId === 'candidates') renderCandidates();
+            if (sectionId === 'opportunities') renderOpportunities();
+            if (sectionId === 'matching') updateMatchSelect();
+            if (sectionId === 'dashboard') updateDashboard();
+        }
+
+        function showAddCandidate() {
+            currentSkills = { tech: [], soft: [], req: [], pref: [], oppSoft: [] };
+            document.getElementById('candidateForm').reset();
+            updateSkillDisplay();
+            document.getElementById('candidateModal').classList.add('active');
+        }
+
+        function showAddOpportunity() {
+            currentSkills = { tech: [], soft: [], req: [], pref: [], oppSoft: [] };
+            document.getElementById('opportunityForm').reset();
+            updateSkillDisplay();
+            document.getElementById('opportunityModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function addSkill(type) {
+            const inputId = type === 'tech' ? 'techSkillInput' : 
+                           type === 'soft' ? 'softSkillInput' :
+                           type === 'req' ? 'reqSkillInput' :
+                           type === 'pref' ? 'prefSkillInput' : 'oppSoftSkillInput';
+            
+            const input = document.getElementById(inputId);
+            const value = input.value.trim();
+            
+            if (value && !currentSkills[type].includes(value)) {
+                currentSkills[type].push(value);
+                input.value = '';
+                updateSkillDisplay();
+            }
+        }
+
+        function removeSkill(type, index) {
+            currentSkills[type].splice(index, 1);
+            updateSkillDisplay();
+        }
+
+        function updateSkillDisplay() {
+            const containers = {
+                tech: 'techSkills',
+                soft: 'softSkills',
+                req: 'reqSkills',
+                pref: 'prefSkills',
+                oppSoft: 'oppSoftSkills'
+            };
+
+            for (let [type, containerId] of Object.entries(containers)) {
+                const container = document.getElementById(containerId);
+                if (!container) continue;
+                
+                container.innerHTML = currentSkills[type].map((skill, idx) => `
+                    <span class="skill-tag">
+                        ${skill}
+                        <button type="button" onclick="removeSkill('${type}', ${idx})">×</button>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function saveCandidate(e) {
+            e.preventDefault();
+            
+            const candidate = {
+                name: document.getElementById('candName').value,
+                email: document.getElementById('candEmail').value,
+                experience: parseInt(document.getElementById('candExp').value) || 0,
+                education: document.getElementById('candEdu').value,
+                technicalSkills: [...currentSkills.tech],
+                softSkills: [...currentSkills.soft],
+                interests: document.getElementById('candInterests').value,
+                gender: Math.random() > 0.5 ? 'male' : 'female', // Simulated for demo
+                diversityFlag: Math.random() > 0.7 // Simulated underrepresented group
+            };
+
+            DataStore.addCandidate(candidate);
+            closeModal('candidateModal');
+            renderCandidates();
+            updateDashboard();
+        }
+
+        function saveOpportunity(e) {
+            e.preventDefault();
+            
+            const opportunity = {
+                title: document.getElementById('oppTitle').value,
+                company: document.getElementById('oppCompany').value,
+                description: document.getElementById('oppDesc').value,
+                type: document.getElementById('oppType').value,
+                minExperience: parseInt(document.getElementById('oppExp').value) || 0,
+                requiredSkills: [...currentSkills.req],
+                preferredSkills: [...currentSkills.pref],
+                softSkills: [...currentSkills.oppSoft],
+                educationLevel: 'bachelor'
+            };
+
+            DataStore.addOpportunity(opportunity);
+            closeModal('opportunityModal');
+            renderOpportunities();
+            updateDashboard();
+        }
+
+        function renderCandidates() {
+            const container = document.getElementById('candidatesList');
+            
+            if (DataStore.candidates.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">👤</div>
+                        <p>No candidates yet. Add your first candidate!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = DataStore.candidates.map(c => `
+                <div class="candidate-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${c.name}</div>
+                            <div class="card-subtitle">${c.email}</div>
+                        </div>
+                        <span class="badge badge-info">${c.experience} yrs exp</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Technical:</strong> ${c.technicalSkills.slice(0, 3).join(', ')}${c.technicalSkills.length > 3 ? '...' : ''}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Education:</strong> ${c.education}
+                    </div>
+                    ${c.diversityFlag ? '<span class="fairness-indicator">⚖ Diversity Candidate</span>' : ''}
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-danger" onclick="deleteCandidate('${c.id}')" style="padding: 8px 16px; font-size: 0.9rem;">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderOpportunities() {
+            const container = document.getElementById('opportunitiesList');
+            
+            if (DataStore.opportunities.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">💼</div>
+                        <p>No opportunities yet. Add your first opportunity!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = DataStore.opportunities.map(o => `
+                <div class="opportunity-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${o.title}</div>
+                            <div class="card-subtitle">${o.company}</div>
+                        </div>
+                        <span class="badge badge-success">${o.type}</span>
+                    </div>
+                    <p style="margin-bottom: 10px; color: var(--gray);">${o.description.substring(0, 100)}...</p>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Required:</strong> ${o.requiredSkills.slice(0, 3).join(', ')}${o.requiredSkills.length > 3 ? '...' : ''}
+                    </div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="findMatchesFor('${o.id}')" style="padding: 8px 16px; font-size: 0.9rem;">
+                            🔍 Find Matches
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteOpportunity('${o.id}')" style="padding: 8px 16px; font-size: 0.9rem;">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteCandidate(id) {
+            if (confirm('Delete this candidate?')) {
+                DataStore.deleteCandidate(id);
+                renderCandidates();
+                updateDashboard();
+            }
+        }
+
+        function deleteOpportunity(id) {
+            if (confirm('Delete this opportunity?')) {
+                DataStore.deleteOpportunity(id);
+                renderOpportunities();
+                updateDashboard();
+            }
+        }
+
+        function updateMatchSelect() {
+            const select = document.getElementById('matchOpportunitySelect');
+            select.innerHTML = '<option value="">-- Select an opportunity --</option>' +
+                DataStore.opportunities.map(o => `<option value="${o.id}">${o.title} at ${o.company}</option>`).join('');
+        }
+
+        function findMatches() {
+            const oppId = document.getElementById('matchOpportunitySelect').value;
+            if (!oppId) return;
+
+            const opportunity = DataStore.opportunities.find(o => o.id === oppId);
+            const matches = matcher.findMatches(opportunity, DataStore.candidates, 10);
+
+            renderMatches(matches, opportunity);
+        }
+
+        function findMatchesFor(oppId) {
+            showSection('matching');
+            document.getElementById('matchOpportunitySelect').value = oppId;
+            findMatches();
+        }
+
+        function renderMatches(matches, opportunity) {
+            const container = document.getElementById('matchingResults');
+            
+            if (matches.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No matches found.</p></div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <h3 style="margin: 20px 0;">Top Matches for ${opportunity.title}</h3>
+                <div class="grid">
+                    ${matches.map((m, idx) => {
+                        const scoreClass = m.match.score >= 80 ? 'high' : m.match.score >= 60 ? 'medium' : 'low';
+                        return `
+                        <div class="candidate-card">
+                            <div class="match-score ${scoreClass}">${m.match.score}%</div>
+                            <div class="card-header" style="padding-right: 70px;">
+                                <div>
+                                    <div class="card-title">#${idx + 1} ${m.candidate.name}</div>
+                                    <div class="card-subtitle">${m.candidate.email}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="explanation-panel">
+                                <div class="explanation-title">Match Breakdown</div>
+                                <ul class="factor-list">
+                                    <li>
+                                        <span>Technical Skills</span>
+                                        <span>${Math.round(m.match.breakdown.technical * 100)}%</span>
+                                    </li>
+                                    <li>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${m.match.breakdown.technical * 100}%"></div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <span>Experience</span>
+                                        <span>${Math.round(m.match.breakdown.experience * 100)}%</span>
+                                    </li>
+                                    <li>
+                                        <span>Soft Skills</span>
+                                        <span>${Math.round(m.match.breakdown.soft * 100)}%</span>
+                                    </li>
+                                    <li>
+                                        <span>Education</span>
+                                        <span>${Math.round(m.match.breakdown.education * 100)}%</span>
+                                    </li>
+                                    <li>
+                                        <span>Project Fit</span>
+                                        <span>${Math.round(m.match.breakdown.projectFit * 100)}%</span>
+                                    </li>
+                                </ul>
+                                
+                                ${m.match.adjustments.length > 0 ? `
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                                    <div class="explanation-title">Fairness Adjustments</div>
+                                    ${m.match.adjustments.map(adj => `
+                                        <div class="fairness-indicator" style="margin: 5px 5px 0 0; display: inline-flex;">
+                                            ${adj.type}: ${adj.impact}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div style="margin-top: 15px;">
+                                <button class="btn btn-primary" onclick="showExplanation('${m.candidate.id}', '${opportunity.id}')" style="width: 100%;">
+                                    📋 View Full Explanation
+                                </button>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            // Save matches
+            DataStore.matches = matches.map(m => ({
+                candidateId: m.candidate.id,
+                opportunityId: opportunity.id,
+                score: m.match.score,
+                timestamp: new Date().toISOString()
+            }));
+            DataStore.save();
+        }
+
+        function showExplanation(candidateId, opportunityId) {
+            const candidate = DataStore.candidates.find(c => c.id === candidateId);
+            const opportunity = DataStore.opportunities.find(o => o.id === opportunityId);
+            const match = matcher.calculateMatch(candidate, opportunity);
+
+            const content = document.getElementById('explanationContent');
+            content.innerHTML = `
+                <h2>📋 Detailed Match Explanation</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div class="card" style="margin: 0;">
+                        <h3>👤 Candidate</h3>
+                        <p><strong>${candidate.name}</strong></p>
+                        <p>${candidate.email}</p>
+                        <p>Experience: ${candidate.experience} years</p>
+                        <p>Education: ${candidate.education}</p>
+                    </div>
+                    <div class="card" style="margin: 0;">
+                        <h3>💼 Opportunity</h3>
+                        <p><strong>${opportunity.title}</strong></p>
+                        <p>${opportunity.company}</p>
+                        <p>Type: ${opportunity.type}</p>
+                        <p>Min Experience: ${opportunity.minExperience} years</p>
+                    </div>
+                </div>
+
+                <div class="explanation-panel">
+                    <div class="explanation-title">Final Match Score: ${match.score}%</div>
+                    <p>Original Score: ${match.originalScore}% | Adjusted: ${match.score}%</p>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>Score Components:</h4>
+                        ${Object.entries(match.breakdown).map(([key, val]) => `
+                            <div style="margin: 10px 0;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="text-transform: capitalize;">${key}</span>
+                                    <span>${Math.round(val * 100)}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${val * 100}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="explanation-panel" style="margin-top: 20px;">
+                    <div class="explanation-title">Reasoning</div>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        ${match.reasoning.map(r => `<li>${r}</li>`).join('')}
+                    </ul>
+                </div>
+
+                ${match.adjustments.length > 0 ? `
+                <div class="explanation-panel" style="margin-top: 20px; border-left-color: var(--secondary);">
+                    <div class="explanation-title">Fairness & Bias Mitigation</div>
+                    ${match.adjustments.map(adj => `
+                        <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 8px;">
+                            <strong>${adj.type}</strong>
+                            <span class="fairness-indicator" style="margin-left: 10px;">${adj.impact}</span>
+                            <p style="margin-top: 8px; color: var(--gray);">${adj.reason}</p>
+                        </div>
+                    `).join('')}
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--gray);">
+                        These adjustments ensure equitable opportunity allocation while maintaining merit-based selection.
+                    </p>
+                </div>
+                ` : ''}
+
+                <div style="margin-top: 20px; padding: 20px; background: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0;">
+                    <h4>✅ Recommendation</h4>
+                    <p>${match.score >= 80 ? 'Strongly recommend for immediate interview' : 
+                         match.score >= 60 ? 'Recommend for interview with skill verification' : 
+                         'Consider for junior role or alternative position'}</p>
+                </div>
+            `;
+
+            document.getElementById('explanationModal').classList.add('active');
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalCandidates').textContent = DataStore.candidates.length;
+            document.getElementById('totalOpportunities').textContent = DataStore.opportunities.length;
+            document.getElementById('totalMatches').textContent = DataStore.matches.length;
+            
+            const avgScore = DataStore.matches.length > 0 ?
+                Math.round(DataStore.matches.reduce((a, m) => a + m.score, 0) / DataStore.matches.length) : 0;
+            document.getElementById('avgScore').textContent = avgScore + '%';
+
+            // Recent high matches
+            const recentContainer = document.getElementById('recentMatches');
+            const highMatches = DataStore.matches.filter(m => m.score >= 80).slice(0, 3);
+            
+            if (highMatches.length === 0) {
+                recentContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🤝</div>
+                        <p>No high-scoring matches yet. Run matching to see results!</p>
+                    </div>
+                `;
+            } else {
+                recentContainer.innerHTML = highMatches.map(m => {
+                    const c = DataStore.candidates.find(cand => cand.id === m.candidateId);
+                    const o = DataStore.opportunities.find(opp => opp.id === m.opportunityId);
+                    return `
+                        <div style="padding: 15px; background: #f0fdf4; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--success);">
+                            <strong>${c?.name}</strong> matched with <strong>${o?.title}</strong>
+                            <span class="badge badge-success" style="margin-left: 10px;">${m.score}%</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function runAutoMatch() {
+            if (DataStore.opportunities.length === 0 || DataStore.candidates.length === 0) {
+                alert('Add both candidates and opportunities first!');
+                return;
+            }
+
+            let totalMatches = 0;
+            DataStore.opportunities.forEach(opp => {
+                const matches = matcher.findMatches(opp, DataStore.candidates, 5);
+                totalMatches += matches.length;
+            });
+
+            alert(`Auto-matching complete! Generated ${totalMatches} potential matches across all opportunities.`);
+            updateDashboard();
+            showSection('matching');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start with login page visible, app hidden
+            document.getElementById('loginPage').classList.add('active');
+            document.getElementById('appWrapper').classList.remove('active');
+            
+            // Add sample data if empty
+            if (DataStore.candidates.length === 0 && DataStore.opportunities.length === 0) {
+                // Sample candidates
+                DataStore.addCandidate({
+                    name: "Alice Johnson",
+                    email: "alice@example.com",
+                    experience: 2,
+                    education: "bachelor",
+                    technicalSkills: ["JavaScript", "React", "Node.js", "Python"],
+                    softSkills: ["Communication", "Teamwork"],
+                    interests: "Web Development, AI",
+                    gender: "female",
+                    diversityFlag: true
+                });
+
+                DataStore.addCandidate({
+                    name: "Bob Smith",
+                    email: "bob@example.com",
+                    experience: 5,
+                    education: "master",
+                    technicalSkills: ["Java", "Spring", "SQL", "AWS"],
+                    softSkills: ["Leadership", "Problem Solving"],
+                    interests: "Backend Systems, Cloud",
+                    gender: "male",
+                    diversityFlag: false
+                });
+
+                // Sample opportunity
+                DataStore.addOpportunity({
+                    title: "Full Stack Developer Intern",
+                    company: "TechCorp",
+                    description: "Looking for a motivated intern to work on web applications using React and Node.js",
+                    type: "internship",
+                    minExperience: 0,
+                    requiredSkills: ["JavaScript", "React"],
+                    preferredSkills: ["Node.js", "MongoDB"],
+                    softSkills: ["Communication", "Teamwork"],
+                    educationLevel: "bachelor"
+                });
+            }
+        });
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
