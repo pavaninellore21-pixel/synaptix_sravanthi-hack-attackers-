@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Skill-Based Internship & Project Matching</title>
+
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #87CEEB; /* Sky Blue Background */
+            min-height: 100vh;
+        }
+
+        h1, h2 { 
+            text-align: center; 
+            color: #333; 
+        }
+
+        .container { 
+            max-width: 950px; 
+            margin: auto; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 25px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); 
+        }
+
+        label { 
+            display: block; 
+            margin-top: 10px; 
+            font-weight: bold; 
+        }
+
+        input[type=text], 
+        input[type=number], 
+        select { 
+            width: 100%; 
+            padding: 8px; 
+            margin-top: 4px; 
+            border-radius: 4px; 
+            border: 1px solid #ccc; 
+        }
+
+        button { 
+            margin-top: 20px; 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 5px; 
+            background-color: #ff66b3; 
+            color: white; 
+            font-size: 1em; 
+            cursor: pointer; 
+        }
+
+        button:hover { 
+            background-color: #ff3385; 
+        }
+
+        .results { 
+            margin-top: 25px; 
+        }
+
+        .candidate { 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            background-color: #fff0f6; 
+        }
+
+        .reasoning { 
+            font-size: 0.9em; 
+            color: #555; 
+            margin-top: 6px; 
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Enhanced Skill-Based Internship & Project Matching</h1>
+
+    <h2>Add Candidate</h2>
+    <label for="candidateName">Candidate Name:</label>
+    <input type="text" id="candidateName" placeholder="John Doe">
+
+    <label for="skills">Skills (comma-separated with proficiency 1-5, e.g., Python:4, SQL:3):</label>
+    <input type="text" id="skills" placeholder="Python:4, SQL:3, Machine Learning:5">
+
+    <label for="experience">Experience (years):</label>
+    <input type="number" id="experience" min="0" max="50" placeholder="2">
+
+    <label for="certifications">Certifications (comma-separated, optional):</label>
+    <input type="text" id="certifications" placeholder="AWS, Azure">
+
+    <label for="domain">Preferred Domain:</label>
+    <input type="text" id="domain" placeholder="AI, Web Development">
+
+    <button onclick="addCandidate()">Add Candidate</button>
+
+    <h2>Define Project Requirements</h2>
+    <label for="projectName">Project Name:</label>
+    <input type="text" id="projectName" placeholder="AI Research Project">
+
+    <label for="projectSkills">Required Skills (comma-separated with importance weight 1-5, e.g., Python:5, SQL:4):</label>
+    <input type="text" id="projectSkills" placeholder="Python:5, SQL:4, Machine Learning:5">
+
+    <label for="projectExperience">Required Experience (years):</label>
+    <input type="number" id="projectExperience" min="0" max="50" placeholder="2">
+
+    <label for="projectCertifications">Preferred Certifications (comma-separated):</label>
+    <input type="text" id="projectCertifications" placeholder="AWS, Azure">
+
+    <button onclick="matchCandidates()">Match Candidates</button>
+
+    <div class="results" id="results"></div>
+</div>
+
+<script>
+let candidates = JSON.parse(localStorage.getItem('candidates') || '[]');
+
+function saveCandidates() {
+    localStorage.setItem('candidates', JSON.stringify(candidates));
+}
+
+function parseSkills(skillStr) {
+    const skills = {};
+    skillStr.split(',').forEach(item => {
+        const [skill, value] = item.split(':').map(s => s.trim());
+        if(skill && value) skills[skill.toLowerCase()] = parseFloat(value);
+    });
+    return skills;
+}
+
+function addCandidate() {
+    const name = document.getElementById('candidateName').value;
+    const skills = parseSkills(document.getElementById('skills').value);
+    const experience = parseFloat(document.getElementById('experience').value) || 0;
+    const certifications = document.getElementById('certifications').value.split(',').map(s => s.trim()).filter(Boolean);
+    const domain = document.getElementById('domain').value.trim();
+
+    if(!name || Object.keys(skills).length === 0){
+        alert('Please enter candidate name and skills');
+        return;
+    }
+
+    candidates.push({name, skills, experience, certifications, domain});
+    saveCandidates();
+    alert(`Candidate ${name} added!`);
+
+    document.getElementById('candidateName').value = '';
+    document.getElementById('skills').value = '';
+    document.getElementById('experience').value = '';
+    document.getElementById('certifications').value = '';
+    document.getElementById('domain').value = '';
+}
+
+function matchCandidates() {
+    const projectName = document.getElementById('projectName').value;
+    const requiredSkills = parseSkills(document.getElementById('projectSkills').value);
+    const requiredExperience = parseFloat(document.getElementById('projectExperience').value) || 0;
+    const preferredCertifications = document.getElementById('projectCertifications').value.split(',').map(s => s.trim()).filter(Boolean);
+
+    if(!projectName || Object.keys(requiredSkills).length === 0){
+        alert('Please enter project name and required skills');
+        return;
+    }
+
+    let resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = `<h2>Matching Results for ${projectName}</h2>`;
+
+    let matches = candidates.map(candidate => {
+        let score = 0;
+        let reasoning = [];
+
+        for (let skill in requiredSkills) {
+            const weight = requiredSkills[skill];
+            const candidateSkillLevel = candidate.skills[skill] || 0;
+            score += (candidateSkillLevel / 5) * weight * 20;
+            reasoning.push(`${skill}: candidate level ${candidateSkillLevel}, weight ${weight}`);
+        }
+
+        if(requiredExperience > 0) {
+            const expScore = Math.min(candidate.experience / requiredExperience, 1) * 10;
+            score += expScore;
+            reasoning.push(`Experience bonus: +${expScore.toFixed(2)}`);
+        }
+
+        const certBonus = preferredCertifications.filter(cert => 
+            candidate.certifications.includes(cert)
+        ).length * 5;
+
+        score += certBonus;
+
+        if(certBonus > 0) 
+            reasoning.push(`Certification bonus: +${certBonus}`);
+
+        return {
+            name: candidate.name,
+            matchScore: Math.max(Math.min(score, 100), 0).toFixed(2),
+            reasoning
+        };
+    });
+
+    matches.sort((a,b) => b.matchScore - a.matchScore);
+
+    matches.forEach(match => {
+        const div = document.createElement('div');
+        div.className = 'candidate';
+        div.innerHTML = `<strong>${match.name}</strong> - Match Score: ${match.matchScore}%<div class='reasoning'>Reasoning:<br>${match.reasoning.join('<br>')}</div>`;
+        resultsDiv.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>
